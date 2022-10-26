@@ -6,8 +6,10 @@
         <entry key="..\:/Users/90544/ChatApp/app/src/main/res/layout/activity_main.xml" value="0.24010416666666667" />
         <entry key="..\:/Users/90544/ChatApp/app/src/main/res/layout/fragment_chat.xml" value="0.25416666666666665" />
         <entry key="..\:/Users/90544/ChatApp/app/src/main/res/layout/fragment_login.xml" value="0.25416666666666665" />
-        <entry key="..\:/Users/90544/ChatApp/app/src/main/res/layout/recycler_row.xml" value="0.253125" />
-        <entry key="..\:/Users/90544/ChatApp/app/src/main/res/layout/recycler_rowRight.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/90544/ChatApp/app/src/main/res/layout/recycler_row.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/90544/ChatApp/app/src/main/res/layout/recycler_row_rigg.xml" value="0.1765625" />
+        <entry key="..\:/Users/90544/ChatApp/app/src/main/res/layout/recycler_row_right.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/90544/ChatApp/app/src/main/res/layout/recycler_rowtwo.xml" value="0.17760416666666667" />
       </map>
     </option>
   </component>

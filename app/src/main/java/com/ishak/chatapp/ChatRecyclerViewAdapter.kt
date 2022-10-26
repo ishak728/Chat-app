@@ -59,8 +59,9 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
 
     //not:bu fonk.altında zaten her bir itemin viewType'ı hazır olarak veriliyo
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatHolder {
-
-
+        val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_row_rigg,parent,false)
+        return ChatHolder(view)
+/*
         if(viewType==viewreceivedType){
             val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_row,parent,false)
             return ChatHolder(view)
@@ -68,7 +69,7 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
         else{
             val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_row_right,parent,false)
             return ChatHolder(view)
-        }
+        }*/
 
     }
 
