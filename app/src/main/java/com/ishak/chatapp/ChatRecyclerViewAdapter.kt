@@ -1,5 +1,5 @@
 package com.ishak.chatapp
-
+ //sdfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,10 +44,12 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
         set(value)=recylerListDiffer.submitList(value)
 
 
-    //hazır fonksiyondur
+
     override fun getItemViewType(position: Int): Int {
 
-        if(chats.get(position).user==FirebaseAuth.getInstance().currentUser?.email.toString()){
+        val chat=chats.get(position)
+
+        if(chat.user==FirebaseAuth.getInstance().currentUser?.email.toString()){
 
             //currentuser'ın viewtype'ını 1 yapıyor
             return viewSentType
@@ -59,9 +61,8 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
 
     //not:bu fonk.altında zaten her bir itemin viewType'ı hazır olarak veriliyo
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatHolder {
-        val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_row_rigg,parent,false)
-        return ChatHolder(view)
-/*
+
+
         if(viewType==viewreceivedType){
             val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_row,parent,false)
             return ChatHolder(view)
@@ -69,7 +70,7 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
         else{
             val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_row_right,parent,false)
             return ChatHolder(view)
-        }*/
+        }
 
     }
 
