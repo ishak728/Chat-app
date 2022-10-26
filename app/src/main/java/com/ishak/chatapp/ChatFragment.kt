@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
@@ -21,8 +22,12 @@ class ChatFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var fireStore:FirebaseFirestore
-
     private var _binding: FragmentChatBinding? = null
+
+    private lateinit var adapter:ChatRecyclerViewAdapter
+    private var chats= arrayListOf<Chat>()
+
+
     // This property is only valid between onCreateView and
 // onDestroyView.
     private val binding get() = _binding!!
@@ -46,6 +51,10 @@ class ChatFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        adapter= ChatRecyclerViewAdapter()
+        binding.recyclerView.adapter=adapter
+        //activity'de olmadığımız için this veremiyoruz.
+        binding.recyclerView.layoutManager=LinearLayoutManager(requireContext())
 
 
         binding.recyclerViewButton.setOnClickListener{
@@ -87,13 +96,19 @@ class ChatFragment : Fragment() {
 
                         val documents=value.documents
 
+                        chats.clear()
                         for(document in documents){
                             val message=document.get("message") as String
                             val userEmail=document.get("userEmail") as String
                             val chat=Chat(userEmail,message)
+
+                            chats.add(chat)
+                            //bunu for dışında yapsak daha iyi olur sanırım
+                            adapter.chats=chats
                         }
 
                     }
+                    adapter.notifyDataSetChanged()
                 }
             }
 
