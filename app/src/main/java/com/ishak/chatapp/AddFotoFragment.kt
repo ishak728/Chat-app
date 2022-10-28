@@ -15,14 +15,25 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.ktx.storage
 import com.ishak.chatapp.databinding.FragmentAddFotoBinding
 import com.ishak.chatapp.databinding.FragmentChatBinding
+import io.grpc.Context
+import java.util.*
 import java.util.jar.Manifest
 
 
 class AddFotoFragment : Fragment() {
 
+    private lateinit var fireStore:FirebaseFirestore
+    private lateinit var storage:FirebaseStorage
 
     var image_uri:Uri?=null
     private var _binding: FragmentAddFotoBinding? = null
@@ -32,6 +43,8 @@ class AddFotoFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        fireStore=Firebase.firestore
+        storage=Firebase.storage
 
     }
 
@@ -50,7 +63,7 @@ class AddFotoFragment : Fragment() {
 
             if(ContextCompat.checkSelfPermission(requireContext(),android.Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
                 if(ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(),android.Manifest.permission.READ_EXTERNAL_STORAGE)){
-                    Snackbar.make(binding.addFoto,"need to permission",Snackbar.LENGTH_INDEFINITE).setAction("give"){
+                    Snackbar.make(binding.upload,"need to permission",Snackbar.LENGTH_INDEFINITE).setAction("give"){
                         ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
                     }
                 }
@@ -65,6 +78,43 @@ class AddFotoFragment : Fragment() {
                 startActivityForResult(intent_gallery,2)
             }
 
+        }
+
+
+        val uuid=UUID.randomUUID()
+        val image="$uuid.jpg"
+        binding.upload.setOnClickListener{
+            //storage'ye resim atanacak.resim linki indirilip firestore'a atanacak
+            if(image_uri!=null){
+                val reference=storage.reference
+println(1)
+                val image_reference=reference.child("image").child(image)
+                image_reference.putFile(image_uri!!).addOnSuccessListener {
+                    println(2)
+
+                    val downloaded_image=image_reference.downloadUrl
+                   image_reference.downloadUrl.addOnSuccessListener {
+                       println(3)
+                       val image_map= hashMapOf<String,Any>()
+                       image_map.put("imageUrl",downloaded_image.toString())
+                       //şu anki zamanı alır
+                       image_map.put("date",Timestamp.now())
+
+                        fireStore.collection("Images").add(image_map)
+
+                       val goChatFragment=AddFotoFragmentDirections.actionAddFotoFragmentToChatFragment()
+                       findNavController().navigate(goChatFragment)
+
+                    }.addOnFailureListener{
+                        Toast.makeText(requireContext(),it.localizedMessage,Toast.LENGTH_LONG).show()
+                    }
+                }.addOnFailureListener{
+                    Toast.makeText(requireContext(),it.localizedMessage,Toast.LENGTH_LONG).show()
+                }
+            }
+            else{
+                Toast.makeText(requireContext(),"select a photo",Toast.LENGTH_LONG).show()
+            }
         }
     }
 
