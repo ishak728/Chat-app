@@ -1,11 +1,11 @@
 package com.ishak.chatapp
 
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
@@ -22,18 +22,19 @@ class ChatFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var fireStore:FirebaseFirestore
-    private var _binding: FragmentChatBinding? = null
+
 
     private lateinit var adapter:ChatRecyclerViewAdapter
     private var chats= arrayListOf<Chat>()
 
-
+    private var _binding: FragmentChatBinding? = null
     // This property is only valid between onCreateView and
 // onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
         fireStore=Firebase.firestore
         auth=Firebase.auth
 
@@ -60,7 +61,6 @@ class ChatFragment : Fragment() {
         binding.recyclerViewButton.setOnClickListener{
             val userEmail=auth.currentUser!!.email
             val message=binding.recyclerViewText.text.toString()
-
             //güncel tarihi alır
             val date=FieldValue.serverTimestamp()
 
@@ -122,5 +122,34 @@ class ChatFragment : Fragment() {
         //null yapılarak hafıza tasarrufu sağlanıyor
         _binding = null
     }
+
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+
+        inflater.inflate(R.menu.menuuu,menu)
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId==R.id.addfoto){
+
+            val go_AddFotoFragment=ChatFragmentDirections.actionChatFragmentToAddFotoFragment()
+            findNavController().navigate(go_AddFotoFragment)
+        }
+
+        //R.id.yazaraktan hersınıftaki view'a erişilebilir
+        if(item.itemId==R.id.exit_to_app){
+            auth.signOut()
+            val goLoginFragments= ChatFragmentDirections.actionChatFragmentToLoginFragment()
+
+            findNavController().navigate(goLoginFragments)
+
+        }
+
+
+        return super.onOptionsItemSelected(item)
+    }
+
 
 }

@@ -43,13 +43,13 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        /*
+
         //kullanıcı daha önce giriş yaptıysa şifre vemaili girmeden otomatikmen giriş yapılır
         val currentUser = auth.currentUser
         if(currentUser != null){
             val goChatFragment=LoginFragmentDirections.actionLoginFragmentToChatFragment()
             findNavController().navigate(goChatFragment)
-        }*/
+        }
 
         binding.signUpbutton.setOnClickListener{
 

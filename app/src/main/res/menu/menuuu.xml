@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/addfoto"
+        android:title="image"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_image"
+        />
+    <item
+        android:id="@+id/exit_to_app"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_exit_to_app"
+        android:title="exit_to_app" />
+
+
+</menu>

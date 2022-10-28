@@ -23,13 +23,15 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
     private val diffUtil=object :DiffUtil.ItemCallback<Chat>(){
         //bu itemları kontrol eder
         override fun areItemsTheSame(oldItem: Chat, newItem: Chat): Boolean {
-
+            var w=0
+            println("w"+w++)
             return oldItem==newItem
         }
 
         //bu da içerikleri kontrol eder
         override fun areContentsTheSame(oldItem: Chat, newItem: Chat): Boolean {
-
+            var d=0
+            println("d"+d++)
             return oldItem==newItem
         }
 
@@ -39,14 +41,17 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
     private val recylerListDiffer= AsyncListDiffer(this,diffUtil)
 
     var chats:List<Chat>
-    //anladığım kadarıyla bu recyclerlistdiffer'a gidip farklı olanı alıyor
-    get() =recylerListDiffer.currentList
+
+        //sanırım geçerli olan listeyi alıyor.araştır diffutil'i
+        get() =recylerListDiffer.currentList
+        //sanırım chats listesine yeni elemanı ekliyor sadece
         set(value)=recylerListDiffer.submitList(value)
 
 
 
     override fun getItemViewType(position: Int): Int {
-
+        var m=0
+        println("m"+m++)
         val chat=chats.get(position)
 
         if(chat.user==FirebaseAuth.getInstance().currentUser?.email.toString()){
@@ -61,7 +66,8 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
 
     //not:bu fonk.altında zaten her bir itemin viewType'ı hazır olarak veriliyo
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatHolder {
-
+        var t=0
+        println("t"+t++)
 
         if(viewType==viewreceivedType){
             val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_row,parent,false)
@@ -75,11 +81,18 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
     }
 
     override fun onBindViewHolder(holder: ChatHolder, position: Int) {
-       val recyclerTextView=holder.itemView.findViewById<TextView>(R.id.recyclerTextView)
-        recyclerTextView.text="${chats.get(position).user}-->${chats.get(position).text}"
+        var i=0
+        println("i"+i++)
+
+       val text=holder.itemView.findViewById<TextView>(R.id.recyclerTextView)
+        val name=holder.itemView.findViewById<TextView>(R.id.name)
+        name.text="${chats.get(position).user} "
+        text.text="${chats.get(position).text}"
     }
 
     override fun getItemCount(): Int {
+        var k=0
+        println("k"+k++)
         return chats.size
     }
 }
