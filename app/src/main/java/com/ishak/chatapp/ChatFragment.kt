@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.Toast
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
@@ -15,7 +14,6 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.ishak.chatapp.databinding.FragmentChatBinding
-import com.ishak.chatapp.databinding.FragmentLoginBinding
 
 
 class ChatFragment : Fragment() {
@@ -37,6 +35,7 @@ class ChatFragment : Fragment() {
         setHasOptionsMenu(true)
         fireStore=Firebase.firestore
         auth=Firebase.auth
+        println("Chatfragment OnCreate")
 
     }
 
@@ -51,25 +50,26 @@ class ChatFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        println("Chatfragment OnViewCreated")
         adapter= ChatRecyclerViewAdapter()
         binding.recyclerView.adapter=adapter
         //activity'de olmadığımız için this veremiyoruz.
         binding.recyclerView.layoutManager=LinearLayoutManager(requireContext())
-
+println("Chatfragment onviewcreated")
 
         binding.recyclerViewButton.setOnClickListener{
             val userEmail=auth.currentUser!!.email
             val message=binding.recyclerViewText.text.toString()
             //güncel tarihi alır
             val date=FieldValue.serverTimestamp()
-
+            val image_url=""
             val saveWithMap= HashMap<String,Any>()
             if (userEmail != null) {
                 saveWithMap.put("userEmail",userEmail)
             }
             saveWithMap.put("message",message)
             saveWithMap.put("date",date)
+            saveWithMap.put("image_url",image_url)
 
             //fireStore'da Chats adlı collection oluşturup ve otomatikmen oluşan documentin altına saveWithMap ekleniyor
             fireStore.collection("Chats").add(saveWithMap).addOnSuccessListener {
@@ -94,17 +94,22 @@ class ChatFragment : Fragment() {
                     }
                     else{
 
+                        println("***************************")
                         val documents=value.documents
 
                         chats.clear()
                         for(document in documents){
+
+                            //anahtar değerlerini doğru yazmak gerekiyor.eğer anahtar bulunamazsa null olarak dönüş yapar
                             val message=document.get("message") as String
                             val userEmail=document.get("userEmail") as String
-                            val chat=Chat(userEmail,message)
+                            val image_url=document.get("image_url") as String
+                            val chat=Chat(userEmail,message,image_url)
 
                             chats.add(chat)
                             //bunu for dışında yapsak daha iyi olur sanırım
                             adapter.chats=chats
+                            println("adapter")
                         }
 
                     }

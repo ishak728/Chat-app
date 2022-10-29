@@ -18,6 +18,9 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -34,6 +37,8 @@ class AddFotoFragment : Fragment() {
 
     private lateinit var fireStore:FirebaseFirestore
     private lateinit var storage:FirebaseStorage
+    private lateinit var auth:FirebaseAuth
+
 
     var image_uri:Uri?=null
     private var _binding: FragmentAddFotoBinding? = null
@@ -45,6 +50,7 @@ class AddFotoFragment : Fragment() {
         super.onCreate(savedInstanceState)
         fireStore=Firebase.firestore
         storage=Firebase.storage
+        auth=Firebase.auth
 
     }
 
@@ -59,58 +65,74 @@ class AddFotoFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.imageView.setOnClickListener{
+        // binding.imageView.setOnClickListener{
 
-            if(ContextCompat.checkSelfPermission(requireContext(),android.Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
-                if(ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(),android.Manifest.permission.READ_EXTERNAL_STORAGE)){
-                    Snackbar.make(binding.upload,"need to permission",Snackbar.LENGTH_INDEFINITE).setAction("give"){
-                        ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
-                    }
-                }
-                else{
+        if(ContextCompat.checkSelfPermission(requireContext(),android.Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+            if(ActivityCompat.shouldShowRequestPermissionRationale(requireActivity(),android.Manifest.permission.READ_EXTERNAL_STORAGE)){
+                Snackbar.make(binding.upload,"need to permission",Snackbar.LENGTH_INDEFINITE).setAction("give"){
                     ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
-
                 }
             }
             else{
-                //galeriye gidilercek
-                val intent_gallery=Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                startActivityForResult(intent_gallery,2)
-            }
+                ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE),1)
 
+            }
         }
+        else{
+            //galeriye gidilercek
+            val intent_gallery=Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            startActivityForResult(intent_gallery,2)
+        }
+
+        // }
 
 
         val uuid=UUID.randomUUID()
         val image="$uuid.jpg"
         binding.upload.setOnClickListener{
+            println(99)
             //storage'ye resim atanacak.resim linki indirilip firestore'a atanacak
             if(image_uri!=null){
+                println(11)
                 val reference=storage.reference
-println(1)
+
                 val image_reference=reference.child("image").child(image)
                 image_reference.putFile(image_uri!!).addOnSuccessListener {
-                    println(2)
+                    println(22)
 
-                    val downloaded_image=image_reference.downloadUrl
-                   image_reference.downloadUrl.addOnSuccessListener {
-                       println(3)
-                       val image_map= hashMapOf<String,Any>()
-                       image_map.put("imageUrl",downloaded_image.toString())
-                       //şu anki zamanı alır
-                       image_map.put("date",Timestamp.now())
+                    image_reference.downloadUrl.addOnSuccessListener {
+                        val downloaded_image_url=it.toString()
+                        println(33)
+                        val userEmail=auth.currentUser!!.email
+                        val message=binding.editTextFoto.text.toString()
+                        //güncel tarihi alır
+                        val date= FieldValue.serverTimestamp()
 
-                        fireStore.collection("Images").add(image_map)
+                        val saveWithMap= HashMap<String,Any>()
+                        if (userEmail != null) {
+                            saveWithMap.put("userEmail",userEmail)
+                        }
+                        saveWithMap.put("message",message)
+                        saveWithMap.put("date",date)
+                        saveWithMap.put("image_url",downloaded_image_url)
 
-                       val goChatFragment=AddFotoFragmentDirections.actionAddFotoFragmentToChatFragment()
-                       findNavController().navigate(goChatFragment)
+                        fireStore.collection("Chats").add(saveWithMap).addOnSuccessListener {
+                            println("ishakkkk")
+                            val goChatFragment=AddFotoFragmentDirections.actionAddFotoFragmentToChatFragment()
+                            findNavController().navigate(goChatFragment)
+                        }.addOnFailureListener{
+                            Toast.makeText(requireContext(),it.localizedMessage,Toast.LENGTH_LONG).show()
+                        }
+
+
 
                     }.addOnFailureListener{
                         Toast.makeText(requireContext(),it.localizedMessage,Toast.LENGTH_LONG).show()
                     }
                 }.addOnFailureListener{
+                    println(".......................")
                     Toast.makeText(requireContext(),it.localizedMessage,Toast.LENGTH_LONG).show()
-                }
+                }.addOnProgressListener { "yükleniyor..." }
             }
             else{
                 Toast.makeText(requireContext(),"select a photo",Toast.LENGTH_LONG).show()
@@ -128,7 +150,7 @@ println(1)
         if(requestCode==1){
             if (grantResults.size>0&&grantResults[0]==PackageManager.PERMISSION_GRANTED){
                 Toast.makeText(requireContext(),"Allowed",Toast.LENGTH_LONG).show()
-                //galeriye gidilecek
+                //galeriye gidilecek.seçim yapıp yapmadığımıza bağlı olarak onActivityResult'a bilgi gönderir
                 val intent_gallery=Intent(Intent.ACTION_PICK,MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                 startActivityForResult(intent_gallery,2)
             }
@@ -137,9 +159,20 @@ println(1)
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
+        //foto seçersek resultCode=-1 olur.
         if(requestCode==2&&resultCode==RESULT_OK){
             image_uri= data?.data
             binding.imageView.setImageURI(image_uri)
+
+            println(resultCode)
+        }
+        //eğer galeriden image seçmezsek buraya gelir
+        else {
+            val goChatFragment=AddFotoFragmentDirections.actionAddFotoFragmentToChatFragment()
+            findNavController().navigate(goChatFragment)
+
+            println(resultCode)
 
         }
     }
