@@ -57,30 +57,39 @@ class ChatFragment : Fragment() {
         binding.recyclerView.layoutManager=LinearLayoutManager(requireContext())
 println("Chatfragment onviewcreated")
 
-        binding.recyclerViewButton.setOnClickListener{
-            val userEmail=auth.currentUser!!.email
-            val message=binding.recyclerViewText.text.toString()
+        binding.recyclerViewButton.setOnClickListener {
+
+            val userEmail = auth.currentUser!!.email
+            val message = binding.recyclerViewText.text.toString()
+
             //güncel tarihi alır
-            val date=FieldValue.serverTimestamp()
-            val image_url=""
-            val saveWithMap= HashMap<String,Any>()
+            val date = FieldValue.serverTimestamp()
+            val image_url = ""
+            val saveWithMap = HashMap<String, Any>()
             if (userEmail != null) {
-                saveWithMap.put("userEmail",userEmail)
+                saveWithMap.put("userEmail", userEmail)
             }
-            saveWithMap.put("message",message)
-            saveWithMap.put("date",date)
-            saveWithMap.put("image_url",image_url)
+            saveWithMap.put("message", message)
+            saveWithMap.put("date", date)
+            saveWithMap.put("image_url", image_url)
 
+            if (message != ""){//boş mesaj atılmasını engelliyor
             //fireStore'da Chats adlı collection oluşturup ve otomatikmen oluşan documentin altına saveWithMap ekleniyor
-            fireStore.collection("Chats").add(saveWithMap).addOnSuccessListener {
-                binding.recyclerViewText.setText("")
+                fireStore.collection("Chats").add(saveWithMap).addOnSuccessListener {
+                    binding.recyclerViewText.setText("")
 
-            }.addOnFailureListener{
-                Toast.makeText(requireContext(),it.localizedMessage,Toast.LENGTH_LONG).show()
-                binding.recyclerViewText.setText("")
+                }.addOnFailureListener {
+                    Toast.makeText(requireContext(), it.localizedMessage, Toast.LENGTH_LONG).show()
+                    binding.recyclerViewText.setText("")
+                }
+
+        }
+            else{
+                Toast.makeText(requireContext(),"you can't leave a blank message", Toast.LENGTH_LONG).show()
             }
 
         }
+
 
         fireStore.collection("Chats").orderBy("date",Query.Direction.ASCENDING).addSnapshotListener{value,error->
 

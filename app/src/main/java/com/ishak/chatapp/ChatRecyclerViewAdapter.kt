@@ -3,16 +3,22 @@ package com.ishak.chatapp
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
+import com.squareup.picasso.Picasso
 
 class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.ChatHolder>() {
 
+
     private val viewSentType=1
     private val viewreceivedType=2
+   //private lateinit var chat: Chat
+   //gönderilen textin boş olup olmadığını sorgular.boşsarecyclerviewimage gösterecektir aksi halde recyclerrow gösterilecektir
+     var isblankMessage=true
 
     class ChatHolder(itemView: View): RecyclerView.ViewHolder(itemView){
 
@@ -23,15 +29,13 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
     private val diffUtil=object :DiffUtil.ItemCallback<Chat>(){
         //bu itemları kontrol eder
         override fun areItemsTheSame(oldItem: Chat, newItem: Chat): Boolean {
-            var w=0
-            println("w"+w++)
+
             return oldItem==newItem
         }
 
         //bu da içerikleri kontrol eder
         override fun areContentsTheSame(oldItem: Chat, newItem: Chat): Boolean {
-            var d=0
-            println("d"+d++)
+
             return oldItem==newItem
         }
 
@@ -47,11 +51,8 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
         //sanırım chats listesine yeni elemanı ekliyor sadece
         set(value)=recylerListDiffer.submitList(value)
 
-
-
     override fun getItemViewType(position: Int): Int {
-        var m=0
-        println("m"+m++)
+
         val chat=chats.get(position)
 
         if(chat.user==FirebaseAuth.getInstance().currentUser?.email.toString()){
@@ -66,33 +67,77 @@ class ChatRecyclerViewAdapter: RecyclerView.Adapter<ChatRecyclerViewAdapter.Chat
 
     //not:bu fonk.altında zaten her bir itemin viewType'ı hazır olarak veriliyo
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatHolder {
-        var t=0
-        println("t"+t++)
 
+
+        //solda mesaj gösterilecek
         if(viewType==viewreceivedType){
-            val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_row,parent,false)
-            return ChatHolder(view)
+
+
+
+
+                val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_image,parent,false)
+                return ChatHolder(view)
+
+
         }
+        //sağda mesaj gösterilecek
         else{
-            val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_row_right,parent,false)
-            return ChatHolder(view)
+
+                val view=LayoutInflater.from(parent.context).inflate(R.layout.recycler_view_image_right,parent,false)
+                return ChatHolder(view)
+
         }
 
     }
 
     override fun onBindViewHolder(holder: ChatHolder, position: Int) {
-        var i=0
-        println("i"+i++)
 
-       val text=holder.itemView.findViewById<TextView>(R.id.recyclerTextView)
-        val name=holder.itemView.findViewById<TextView>(R.id.name)
-        name.text="${chats.get(position).user} "
-        text.text="${chats.get(position).text}"
+        //image için recyclerview gösterilecek
+        if(chats.get(position).image_url!=""){
+            val text:TextView?=holder.itemView.findViewById<TextView>(R.id.Recycler_view_image_textView)
+            val name=holder.itemView.findViewById<TextView>(R.id.name)
+/*
+            if(text?.text==""){
+                text?.visibility=View.GONE
+            }
+            else{
+                text?.text="${chats.get(position).text}"
+            }
+*/
+            text?.text="${chats.get(position).text}"
+
+            name.text="${chats.get(position).user}"
+            val image=holder.itemView.findViewById<ImageView>(R.id.Recycler_view_image_imageView)
+
+            if(chats.get(position).image_url!=""){
+                println("nulllll değil...")
+                Picasso.get().load(chats.get(position).image_url).into(image)
+                println("*******************************************************("+chats.get(position).image_url+")")
+            }
+
+
+        }
+        //text için recyclerview gösterileccek
+        else{
+
+            if(chats.get(position).image_url==""){
+                val image=holder.itemView.findViewById<ImageView>(R.id.Recycler_view_image_imageView)
+              image.visibility=View.GONE
+            }
+            val text:TextView?=holder.itemView.findViewById<TextView>(R.id.Recycler_view_image_textView)
+            val name=holder.itemView.findViewById<TextView>(R.id.name)
+            name.text="${chats.get(position).user}"
+            text?.text="${chats.get(position).text}"
+        }
+
+
+
+
+
     }
 
     override fun getItemCount(): Int {
-        var k=0
-        println("k"+k++)
+
         return chats.size
     }
 }
